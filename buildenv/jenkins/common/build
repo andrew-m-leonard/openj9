@@ -46,6 +46,9 @@ def get_source() {
 	    // use sshagent with Jenkins credentials ID for all platforms except zOS
             // on zOS use the user's ssh key
             if (!SPEC.startsWith('zos') && (USER_CREDENTIALS_ID != '')) {
+	        sh "export PERL5LIB=/rsusr/rocket/lib/perl5:$PERL5LIB"
+	        sh "export PATH=/home/j9build/j9_make:/home/j9build/autoconf/bin:$PATH"
+		sh "export LIBPATH=/rsusr/rocket/lib/perl5/5.24.0/os390/CORE:.:$LIBPATH"
                 get_sources_with_authentication()
             } else {
                 get_sources()
