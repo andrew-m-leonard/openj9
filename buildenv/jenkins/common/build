@@ -258,7 +258,11 @@ def build() {
     stage('Compile') {
         timestamps {
             withEnv(BUILD_ENV_VARS_LIST) {
-	        sh "printenv"
+	        
+		sh "export PERL5LIB=/rsusr/rocket/lib/perl5:$PERL5LIB"
+                sh "export PATH=/home/j9build/j9_make:/home/j9build/autoconf/bin:$PATH"
+                sh "export LIBPATH=/rsusr/rocket/lib/perl5/5.24.0/os390/CORE:.:$LIBPATH"
+		sh "printenv"
                 sh "${BUILD_ENV_CMD} bash configure --with-freemarker-jar='$FREEMARKER' --with-boot-jdk='$BOOT_JDK' $EXTRA_CONFIGURE_OPTIONS && make $EXTRA_MAKE_OPTIONS all"
             }
         }
