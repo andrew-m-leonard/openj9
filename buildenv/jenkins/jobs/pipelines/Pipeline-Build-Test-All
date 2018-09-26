@@ -223,7 +223,12 @@ def build(OPENJDK_REPO, OPENJDK_BRANCH, SHAS, OPENJ9_REPO, OPENJ9_BRANCH, OMR_RE
                     string(name: 'BUILD_NODE', value: BUILD_NODE),
                     string(name: 'TEST_NODE', value: TEST_NODE),
                     string(name: 'PERSONAL_BUILD', value: PERSONAL_BUILD),
-                    string(name: 'SLACK_CHANNEL', value: SLACK_HANDLE)]
+                    string(name: 'SLACK_CHANNEL', value: SLACK_HANDLE),
+                    booleanParam(name: 'TEST_WITH_GRINDER', value: TEST_WITH_GRINDER),
+                    string(name: 'ADOPTOPENJDK_REPO', value: ADOPTOPENJDK_REPO),
+                    string(name: 'ADOPTOPENJDK_BRANCH', value: ADOPTOPENJDK_BRANCH),
+                    string(name: 'JAVA_IMPL', value: JAVA_IMPL),
+                    string(name: 'CUSTOM_TARGET', value: CUSTOM_TARGET)]
         return JOB
     }
 }

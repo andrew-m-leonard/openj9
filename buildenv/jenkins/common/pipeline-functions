@@ -20,6 +20,32 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0 OR GPL-2.0 WITH Classpath-exception-2.0 OR LicenseRef-GPL-2.0 WITH Assembly-exception
  *******************************************************************************/
 
+GRINDER_JOB = 'Grinder_Sandbox'
+
+GRINDER_JENKINS_FILE =
+        ['aix_ppc-64_cmprssptrs'         : 'openjdk_ppc64_aix',
+         'linux_390-64_cmprssptrs'       : 'openjdk_s390x_linux',
+         'linux_ppc-64_cmprssptrs_le'    : 'openjdk_ppc64le_linux',
+         'linux_x86-64'                  : 'openjdk_x86-64_linux_largeHeap',
+         'linux_x86-64_cmprssptrs'       : 'openjdk_x86-64_linux',
+         'linux_x86-64_cmprssptrs_cmake' : 'openjdk_x86-64_linux',
+         'win_x86'                       : 'openjdk_x86-64_windows',
+         'win_x86-64_cmprssptrs'         : 'openjdk_x86-64_windows']
+
+GRINDER_JAVA_VERSION =
+        ['8'  : 'SE80',
+         '9'  : 'SE90',
+         '10' : 'SE100',
+         '11' : 'SE110',
+         'next' : 'SE110']
+
+GRINDER_JVM_VERSION =
+        ['8'  : 'openjdk8',
+         '9'  : 'openjdk9',
+         '10' : 'openjdk10',
+         '11' : 'openjdk11',
+         'next' : 'openjdk11']
+
 def get_shas(OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO, OPENJ9_BRANCH, OMR_REPO, OMR_BRANCH, VENDOR_TEST_REPOS_MAP=null, VENDOR_TEST_BRANCHES_MAP=null, VENDOR_TEST_SHAS_MAP=null) {
     // Get a set of SHAs for a standard OpenJ9 build
     def SHAS = [:]
@@ -155,10 +181,10 @@ def build(BUILD_JOB_NAME, OPENJDK_REPO, OPENJDK_BRANCH, OPENJDK_SHA, OPENJ9_REPO
     }
 }
 
-def build_with_one_upstream(JOB_NAME, UPSTREAM_JOB_NAME, UPSTREAM_JOB_NUMBER, VARIABLE_FILE, VENDOR_REPO, VENDOR_BRANCH, VENDOR_CREDENTIALS_ID, NODE, OPENJ9_REPO, OPENJ9_BRANCH, OPENJ9_SHA, VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST) {
+def build_with_one_upstream(JOB_NAME, UPSTREAM_JOB_NAME, UPSTREAM_JOB_NUMBER, VARIABLE_FILE, VENDOR_REPO, VENDOR_BRANCH, VENDOR_CREDENTIALS_ID, NODE, OPENJ9_REPO, OPENJ9_BRANCH, OPENJ9_SHA, VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST, ADOPTOPENJDK_REPO, ADOPTOPENJDK_BRANCH, SPEC, SDK_VERSION, JAVA_IMPL, CUSTOM_TARGET) {
     stage ("${JOB_NAME}") {
-        return build_with_slack(JOB_NAME,
-            [string(name: 'UPSTREAM_JOB_NAME', value: UPSTREAM_JOB_NAME),
+
+        def JOB_PARAMS = [string(name: 'UPSTREAM_JOB_NAME', value: UPSTREAM_JOB_NAME),
             string(name: 'UPSTREAM_JOB_NUMBER', value: "${UPSTREAM_JOB_NUMBER}"),
             string(name: 'VARIABLE_FILE', value: VARIABLE_FILE),
             string(name: 'VENDOR_REPO', value: VENDOR_REPO),
@@ -173,15 +199,34 @@ def build_with_one_upstream(JOB_NAME, UPSTREAM_JOB_NAME, UPSTREAM_JOB_NUMBER, VA
             string(name: 'VENDOR_TEST_SHAS', value: VENDOR_TEST_SHAS),
             string(name: 'VENDOR_TEST_DIRS', value: VENDOR_TEST_DIRS),
             string(name: 'USER_CREDENTIALS_ID', value: USER_CREDENTIALS_ID),
-            string(name: 'BUILD_LIST', value: BUILD_LIST)])
+            string(name: 'BUILD_LIST', value: BUILD_LIST)]   
 
+        // Add Grinder params
+        if (JOB_NAME == GRINDER_JOB) {
+            def JVM_VERSION = GRINDER_JVM_VERSION[SDK_VERSION]
+            if (JAVA_IMPL == 'openj9') {
+                JVM_VERSION += '-openj9'
+            }
+
+            JOB_PARAMS.add(string(name: 'ADOPTOPENJDK_REPO', value: ADOPTOPENJDK_REPO))
+            JOB_PARAMS.add(string(name: 'ADOPTOPENJDK_BRANCH', value: ADOPTOPENJDK_BRANCH))
+            JOB_PARAMS.add(string(name: 'JenkinsFile', value: GRINDER_JENKINS_FILE[SPEC]))
+            JOB_PARAMS.add(string(name: 'JAVA_VERSION', value: GRINDER_JAVA_VERSION[SDK_VERSION]))
+            JOB_PARAMS.add(string(name: 'JAVA_IMPL', value: JAVA_IMPL))
+            JOB_PARAMS.add(string(name: 'JVM_VERSION', value: JVM_VERSION))
+            JOB_PARAMS.add(string(name: 'TARGET', value: TESTS_TARGETS))
+            JOB_PARAMS.add(string(name: 'CUSTOM_TARGET', value: CUSTOM_TARGET))
+            JOB_PARAMS.add(string(name: 'SDK_RESOURCE', value: 'customized'))
+        }
+
+        return build_with_slack(JOB_NAME, JOB_PARAMS)
     }
 }
 
-def build_with_artifactory(JOB_NAME, VARIABLE_FILE, VENDOR_REPO, VENDOR_BRANCH, VENDOR_CREDENTIALS_ID, NODE, OPENJ9_REPO, OPENJ9_BRANCH, OPENJ9_SHA, VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST, CUSTOMIZED_SDK_URL, ARTIFACTORY_CREDS) {
+def build_with_artifactory(JOB_NAME, VARIABLE_FILE, VENDOR_REPO, VENDOR_BRANCH, VENDOR_CREDENTIALS_ID, NODE, OPENJ9_REPO, OPENJ9_BRANCH, OPENJ9_SHA, VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST, CUSTOMIZED_SDK_URL, ARTIFACTORY_CREDS, ADOPTOPENJDK_REPO, ADOPTOPENJDK_BRANCH, SPEC, SDK_VERSION, JAVA_IMPL, CUSTOM_TARGET) {
     stage ("${JOB_NAME}") {
-        return build_with_slack(JOB_NAME,
-            [string(name: 'VARIABLE_FILE', value: VARIABLE_FILE),
+
+        def JOB_PARAMS = [string(name: 'VARIABLE_FILE', value: VARIABLE_FILE),
             string(name: 'VENDOR_REPO', value: VENDOR_REPO),
             string(name: 'VENDOR_BRANCH', value: VENDOR_BRANCH),
             string(name: 'VENDOR_CREDENTIALS_ID', value: VENDOR_CREDENTIALS_ID),
@@ -196,7 +241,27 @@ def build_with_artifactory(JOB_NAME, VARIABLE_FILE, VENDOR_REPO, VENDOR_BRANCH, 
             string(name: 'USER_CREDENTIALS_ID', value: USER_CREDENTIALS_ID),
             string(name: 'BUILD_LIST', value: BUILD_LIST),
             string(name: 'CUSTOMIZED_SDK_URL', value: CUSTOMIZED_SDK_URL),
-            string(name: 'CUSTOMIZED_SDK_URL_CREDENTIAL_ID', value: ARTIFACTORY_CREDS)])
+            string(name: 'CUSTOMIZED_SDK_URL_CREDENTIAL_ID', value: ARTIFACTORY_CREDS)]
+
+        // Add Grinder params
+        if (JOB_NAME == GRINDER_JOB) {
+            def JVM_VERSION = GRINDER_JVM_VERSION[SDK_VERSION]
+            if (JAVA_IMPL == 'openj9') {
+                JVM_VERSION += '-openj9'
+            }
+
+            JOB_PARAMS.add(string(name: 'ADOPTOPENJDK_REPO', value: ADOPTOPENJDK_REPO))
+            JOB_PARAMS.add(string(name: 'ADOPTOPENJDK_BRANCH', value: ADOPTOPENJDK_BRANCH))
+            JOB_PARAMS.add(string(name: 'JenkinsFile', value: GRINDER_JENKINS_FILE[SPEC]))
+            JOB_PARAMS.add(string(name: 'JAVA_VERSION', value: GRINDER_JAVA_VERSION[SDK_VERSION]))
+            JOB_PARAMS.add(string(name: 'JAVA_IMPL', value: JAVA_IMPL))
+            JOB_PARAMS.add(string(name: 'JVM_VERSION', value: JVM_VERSION))
+            JOB_PARAMS.add(string(name: 'TARGET', value: TESTS_TARGETS))
+            JOB_PARAMS.add(string(name: 'CUSTOM_TARGET', value: CUSTOM_TARGET))
+            JOB_PARAMS.add(string(name: 'SDK_RESOURCE', value: 'customized'))
+        }
+
+        return build_with_slack(JOB_NAME, JOB_PARAMS)
     }
 }
 
@@ -234,6 +299,10 @@ def build_with_slack(JOB_NAME, PARAMETERS) {
 }
 
 def workflow(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO, OPENJ9_BRANCH, OMR_REPO, OMR_BRANCH, TESTS_TARGETS, VENDOR_TEST_REPOS_MAP, VENDOR_TEST_BRANCHES_MAP, VENDOR_TEST_DIRS_MAP, USER_CREDENTIALS_ID, BUILD_LIST) {
+   return workflowWithGrinder(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO, OPENJ9_BRANCH, OMR_REPO, OMR_BRANCH, TESTS_TARGETS, VENDOR_TEST_REPOS_MAP, VENDOR_TEST_BRANCHES_MAP, VENDOR_TEST_DIRS_MAP, USER_CREDENTIALS_ID, BUILD_LIST, false, '', '', '', '')
+}
+
+def workflowWithGrinder(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO, OPENJ9_BRANCH, OMR_REPO, OMR_BRANCH, TESTS_TARGETS, VENDOR_TEST_REPOS_MAP, VENDOR_TEST_BRANCHES_MAP, VENDOR_TEST_DIRS_MAP, USER_CREDENTIALS_ID, BUILD_LIST, TEST_WITH_GRINDER, ADOPTOPENJDK_REPO, ADOPTOPENJDK_BRANCH, JAVA_IMPL, CUSTOM_TARGET) {
     def jobs = [:]
 
     // compile the source and build the SDK
@@ -279,11 +348,15 @@ def workflow(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO,
         }
         for (name in TARGET_NAMES) {
             def TEST_JOB_NAME = "Test-${name}-JDK${SDK_VERSION}-${SPEC}"
+            if (TEST_WITH_GRINDER) {
+                TEST_JOB_NAME = GRINDER_JOB
+                echo "Using ${TEST_JOB_NAME} : ADOPTOPENJDK_REPO = ${ADOPTOPENJDK_REPO}, ADOPTOPENJDK_BRANCH = ${ADOPTOPENJDK_BRANCH}, JenkinsFile = ${GRINDER_JENKINS_FILE[SPEC]}, JAVA_VERSION = ${GRINDER_JAVA_VERSION[SDK_VERSION]}, JAVA_IMPL=${JAVA_IMPL}, CUSTOM_TARGET = ${CUSTOM_TARGET}"
+            }
             testjobs["${TEST_JOB_NAME}"] = {
                 if (ARTIFACTORY_CREDS) {
-                    jobs["${TEST_JOB_NAME}"] = build_with_artifactory(TEST_JOB_NAME, params.VARIABLE_FILE, params.VENDOR_REPO, params.VENDOR_BRANCH, params.VENDOR_CREDENTIALS_ID, params.TEST_NODE, OPENJ9_REPO, OPENJ9_BRANCH, SHAS['OPENJ9'], VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST, CUSTOMIZED_SDK_URL, ARTIFACTORY_CREDS)
+                    jobs["${TEST_JOB_NAME}"] = build_with_artifactory(TEST_JOB_NAME, params.VARIABLE_FILE, params.VENDOR_REPO, params.VENDOR_BRANCH, params.VENDOR_CREDENTIALS_ID, params.TEST_NODE, OPENJ9_REPO, OPENJ9_BRANCH, SHAS['OPENJ9'], VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST, CUSTOMIZED_SDK_URL, ARTIFACTORY_CREDS, ADOPTOPENJDK_REPO, ADOPTOPENJDK_BRANCH, SPEC, SDK_VERSION, JAVA_IMPL, CUSTOM_TARGET)
                 } else {
-                    jobs["${TEST_JOB_NAME}"] = build_with_one_upstream(TEST_JOB_NAME, BUILD_JOB_NAME, jobs["build"].getNumber(), params.VARIABLE_FILE, params.VENDOR_REPO, params.VENDOR_BRANCH, params.VENDOR_CREDENTIALS_ID, params.TEST_NODE, OPENJ9_REPO, OPENJ9_BRANCH, SHAS['OPENJ9'], VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST)
+                    jobs["${TEST_JOB_NAME}"] = build_with_one_upstream(TEST_JOB_NAME, BUILD_JOB_NAME, jobs["build"].getNumber(), params.VARIABLE_FILE, params.VENDOR_REPO, params.VENDOR_BRANCH, params.VENDOR_CREDENTIALS_ID, params.TEST_NODE, OPENJ9_REPO, OPENJ9_BRANCH, SHAS['OPENJ9'], VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, BUILD_LIST, ADOPTOPENJDK_REPO, ADOPTOPENJDK_BRANCH, SPEC, SDK_VERSION, JAVA_IMPL, CUSTOM_TARGET)
                 }
                 echo "JOB: ${TEST_JOB_NAME} PASSED in: ${jobs[TEST_JOB_NAME].getDurationString()}"
             }

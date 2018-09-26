@@ -420,6 +420,32 @@ def set_test_targets() {
     }
 }
 
+/*
+* Set Grinder variables.
+*/
+def set_grinder_variables() {
+    TEST_WITH_GRINDER = params.TEST_WITH_GRINDER
+    if (!TEST_WITH_GRINDER) {
+        TEST_WITH_GRINDER = false
+    }
+    ADOPTOPENJDK_REPO = params.ADOPTOPENJDK_REPO
+    if (!ADOPTOPENJDK_REPO) {
+        ADOPTOPENJDK_REPO = ''
+    }
+    ADOPTOPENJDK_BRANCH = params.ADOPTOPENJDK_BRANCH
+    if (!ADOPTOPENJDK_BRANCH) {
+        ADOPTOPENJDK_BRANCH = ''
+    }
+    JAVA_IMPL = params.JAVA_IMPL
+    if (!JAVA_IMPL) {
+        JAVA_IMPL = ''
+    }
+    CUSTOM_TARGET = params.CUSTOM_TARGET
+    if (!CUSTOM_TARGET) {
+        CUSTOM_TARGET = ''
+    }
+}
+
 def set_slack_channel() {
     SLACK_CHANNEL = params.SLACK_CHANNEL
     if (!SLACK_CHANNEL && (!params.PERSONAL_BUILD || params.PERSONAL_BUILD != 'true')) {
@@ -653,11 +679,13 @@ def set_job_variables(job_type) {
             set_repos_variables()
             set_vendor_variables()
             set_test_targets()
+            set_grinder_variables()
             set_slack_channel()
             break
         case "wrapper":
             //set variable for pipeline all/personal
             set_repos_variables(BUILD_RELEASES)
+            set_grinder_variables()
             break
         default:
             error("Unknown Jenkins job type!")
