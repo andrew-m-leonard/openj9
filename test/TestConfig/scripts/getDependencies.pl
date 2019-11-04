@@ -204,6 +204,7 @@ if ($task eq "clean") {
 
 		# validate dependencies sha sum
 		$sha = Digest::SHA->new($shaalg);
+                print "FILE to $shaalg digest $filename";
 		$sha->addfile($filename);
 		$digest = $sha->hexdigest;
 
@@ -231,12 +232,13 @@ sub getShaFromFile {
 	} else {
 		print "WARNING: cannot get the sha from $shafile.\nFile content: $content\n";
 	}
+        print "getShaFromFile: $shafile SHA: $sha";
 	return $sha;
 }
 
 sub downloadFile {
 	my ( $url, $filename ) = @_;
-	print "downloading $url\n";
+	print "downloading $url TO $filename\n";
 	my $output;
 	# ToDo: should use curl only
 	if ($os eq 'os.zos') {
