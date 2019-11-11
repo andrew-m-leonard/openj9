@@ -504,6 +504,7 @@ def get_test_job_name(targetName, spec, version, identifier) {
 
 def convert_build_identifier(val) {
     switch (val) {
+        case "HursleyZos_Nightly":
         case "Nightly":
         case "Release":
             return val
