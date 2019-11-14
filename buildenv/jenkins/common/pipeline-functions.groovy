@@ -436,6 +436,7 @@ def workflow(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO,
             }
             def TEST_FLAG = (name.contains('+')) ? name.substring(name.indexOf('+')+1).toUpperCase() : ''
             def TEST_JOB_NAME = get_test_job_name(get_target_name(name), SPEC, SDK_VERSION, BUILD_IDENTIFIER)
+            TEST_JOB_NAME = "ATest_openjdk11_j9_sanity.openjdk_s390x_zos_HursleyZosNightly"
 
             def IS_PARALLEL = false
             if (TEST_JOB_NAME.contains("special.system")){
