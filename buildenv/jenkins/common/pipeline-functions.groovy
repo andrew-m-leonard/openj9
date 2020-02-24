@@ -378,6 +378,7 @@ def workflow(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO,
     echo "BUILD_JOB_ENV:'${BUILD_JOB_ENV}'"
     if (BUILD_JOB_ENV['CUSTOMIZED_SDK_URL']) {
         CUSTOMIZED_SDK_URL = BUILD_JOB_ENV['CUSTOMIZED_SDK_URL']
+        CUSTOMIZED_SDK_URL = "${CUSTOMIZED_SDK_URL} https://na.artifactory.swg-devops.com/artifactory/sys-rt-generic-local/UploadFile/190/jtreg-4.2-b14.tar.gz"
         ARTIFACTORY_CREDS = BUILD_JOB_ENV['ARTIFACTORY_CREDS']
         ARTIFACTORY_SERVER = BUILD_JOB_ENV['ARTIFACTORY_SERVER']
         ARTIFACTORY_REPO = BUILD_JOB_ENV['ARTIFACTORY_REPO']
@@ -387,6 +388,11 @@ def workflow(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO,
         echo "Using ARTIFACTORY_CREDS:'${ARTIFACTORY_CREDS}'"
         echo "Using ARTIFACTORY_SERVER:'${ARTIFACTORY_SERVER}'"
         echo "Passing ARTIFACTORY_MANUAL_CLEANUP:'${ARTIFACTORY_MANUAL_CLEANUP}'"
+
+        echo "Value ADOPTOPENJDK_REPO:'${ADOPTOPENJDK_REPO}'"
+        ADOPTOPENJDK_REPO = "git@github.com:andrew-m-leonard/openjdk-tests.git"
+        ADOPTOPENJDK_BRANCH = "zosjtreg"        
+        echo "Value2 ADOPTOPENJDK_REPO:'${ADOPTOPENJDK_REPO}'"
 
         cleanup_artifactory(ARTIFACTORY_MANUAL_CLEANUP, BUILD_JOB_NAME, ARTIFACTORY_SERVER, ARTIFACTORY_REPO, ARTIFACTORY_NUM_ARTIFACTS)
     }
@@ -426,6 +432,7 @@ def workflow(SDK_VERSION, SPEC, SHAS, OPENJDK_REPO, OPENJDK_BRANCH, OPENJ9_REPO,
             echo "Target:'${target}' extraTestLabels:'${extraTestLabels}', keepReportDir:'${keepReportDir}'"
 
             def TEST_JOB_NAME = get_test_job_name(target, SPEC, SDK_VERSION, BUILD_IDENTIFIER)
+            TEST_JOB_NAME = "ATest_openjdk11_j9_sanity.openjdk_s390x_zos_HursleyZosNightly"
 
             def IS_PARALLEL = false
             if (TEST_JOB_NAME.contains("special.system")) {
