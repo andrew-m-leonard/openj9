@@ -28,7 +28,11 @@ variableFile = ''
 buildFile = ''
 
 timestamps {
-    timeout(time: 20, unit: 'HOURS') {
+    def time_limit = 20
+    if(params.TIME_LIMIT) {
+        time_limit = params.TIME_LIMIT.toInteger()
+    }
+    timeout(time: time_limit, unit: 'HOURS') {
         node(SETUP_LABEL) {
             try{
                 def gitConfig = scm.getUserRemoteConfigs().get(0)

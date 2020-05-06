@@ -223,6 +223,9 @@ def build(BUILD_JOB_NAME, OPENJDK_REPO, OPENJDK_BRANCH, OPENJDK_SHA, OPENJ9_REPO
 def test(JOB_NAME, UPSTREAM_JOB_NAME, UPSTREAM_JOB_NUMBER, NODE, OPENJ9_REPO, OPENJ9_BRANCH, OPENJ9_SHA, VENDOR_TEST_REPOS, VENDOR_TEST_BRANCHES, VENDOR_TEST_SHAS, VENDOR_TEST_DIRS, USER_CREDENTIALS_ID, CUSTOMIZED_SDK_URL, ARTIFACTORY_CREDS, TEST_FLAG, BUILD_IDENTIFIER, ghprbGhRepository, ghprbActualCommit, GITHUB_SERVER, ADOPTOPENJDK_REPO, ADOPTOPENJDK_BRANCH, PARALLEL, extraTestLabels, keepReportDir, buildList) {
     stage ("${JOB_NAME}") {
         def testParams = []
+        if (params.TIME_LIMIT) {
+            testParams.add(string(name: 'TIME_LIMIT', value: params.TIME_LIMIT))
+        } 
         testParams.addAll([string(name: 'LABEL', value: NODE),
             string(name: 'LABEL_ADDITION', value: extraTestLabels),
             string(name: 'ADOPTOPENJDK_REPO', value: ADOPTOPENJDK_REPO),
