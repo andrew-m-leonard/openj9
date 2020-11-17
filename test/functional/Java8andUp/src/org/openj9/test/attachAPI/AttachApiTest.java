@@ -99,7 +99,8 @@ abstract class AttachApiTest {
 		for (int i = 0; i < copies; ++i) {
 			if (!tgts[i].syncWithTarget()) {
 				if (TargetManager.TargetStatus.INIT_DUPLICATE_VMID
-						.equals(tgts[i].getTargetVmStatus())) 3/*
+						.equals(tgts[i].getTargetVmStatus())) {
+                                        /*
 					 * could not initialize attach API due to crud in the
 					 * advertisement directory
 					 */
