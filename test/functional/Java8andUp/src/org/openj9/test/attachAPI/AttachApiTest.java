@@ -99,8 +99,7 @@ abstract class AttachApiTest {
 		for (int i = 0; i < copies; ++i) {
 			if (!tgts[i].syncWithTarget()) {
 				if (TargetManager.TargetStatus.INIT_DUPLICATE_VMID
-						.equals(tgts[i].getTargetVmStatus())) {
-					/*
+						.equals(tgts[i].getTargetVmStatus())) 3/*
 					 * could not initialize attach API due to crud in the
 					 * advertisement directory
 					 */
@@ -213,11 +212,14 @@ System.out.println("AAA: runCommand constructor");
 		log(cmdLine.stream().collect(Collectors.joining(" ", "command line: ", "")));
 		ProcessBuilder jpsProcess = new ProcessBuilder(cmdLine);
 		Process proc = jpsProcess.start();
-System.out.println("AAA:runCommand proc started");
+System.out.println("AAA:runCommand proc started "+cmdLine);
 		List<String> outputLines = Collections.emptyList();
 		try (BufferedReader jpsOutReader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+System.out.println("AAA:runCommand proc 1");
 			outputLines = jpsOutReader.lines().collect(Collectors.toList());
+System.out.println("AAA:runCommand proc 2");
 			proc.waitFor(1000, TimeUnit.MILLISECONDS);
+System.out.println("AAA:runCommand proc 3");
 		} catch (InterruptedException e) {
 			/* ignore */
 		}
