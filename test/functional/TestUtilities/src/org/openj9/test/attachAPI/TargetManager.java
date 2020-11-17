@@ -103,8 +103,10 @@ class TargetManager {
 	}
 
 	public TargetManager(String cmdName, String targetId) {
+System.out.println("AAA: TargetManager constructor");
 		this.targetId = targetId;
 		this.proc = launchTarget(cmdName, targetId, null, null, null);
+System.out.println("AAA: TargetManager constructor completed");
 	}
 
 	/**
@@ -323,14 +325,19 @@ class TargetManager {
 	}
 
 	boolean syncWithTarget() {
+System.out.println("AAA: syncWithTarget 1");
 		targetVmStatus = readTargetPidAndStatus();
+System.out.println("AAA: syncWithTarget 2");
 		if (!TargetStatus.INIT_SUCCESS.equals(targetVmStatus)) {
 			logger.debug("TargetManager.syncWithTarget() failed!");
+System.out.println("AAA: syncWithTarget 5");
 			return false;
 		}
+System.out.println("AAA: syncWithTarget 3");
 		if (null == targetId) {
 			targetId = targetVmid;
 		}
+System.out.println("AAA: syncWithTarget 4");
 		return true;
 	}
 
@@ -385,33 +392,43 @@ class TargetManager {
 	}
 
 	protected int terminateTarget() {
+System.out.println("AAA: terminateTarget");
 		int rc = -1;
 		if (!active) {
 			return 0;
 		}
+System.out.println("AAA: terminateTarget 1");
 		active = false;
 		try {
 			targetInWriter.write(TargetManager.TARGETVM_STOP + '\n');
+System.out.println("AAA: terminateTarget 2");
 			try {
 				targetInWriter.flush();
 			} catch (IOException e) {
 				/* ignore it */
 			}
+System.out.println("AAA: terminateTarget 3");
 			while (targetErrReader.ready()) {
+System.out.println("AAA: terminateTarget 4");
 				String currentLine = targetErrReader.readLine();
 				if ((null != currentLine) &&
 						!currentLine.startsWith("JVMJ9VM082E Unable to switch to IFA processor")) {
 					errOutput += currentLine + "\n";
 				}
 			}
+System.out.println("AAA: terminateTarget 5");
 			while (targetOutReader.ready()) {
+System.out.println("AAA: terminateTarget 6");
 				String currentLine = targetOutReader.readLine();
 				if (null != currentLine) {
 					outOutput += currentLine + "\n";
 				}
 			}
+System.out.println("AAA: terminateTarget 7");
 			rc = proc.waitFor();
+System.out.println("AAA: terminateTarget 8");
 			proc.destroy();
+System.out.println("AAA: terminateTarget 9");
 		} catch (IOException e) { 
 			/* target closed the streams */
 		} catch (InterruptedException e) {
@@ -437,6 +454,7 @@ class TargetManager {
 			}
 			
 		}
+System.out.println("AAA: terminateTarget 10");
 		return rc;
 	}
 

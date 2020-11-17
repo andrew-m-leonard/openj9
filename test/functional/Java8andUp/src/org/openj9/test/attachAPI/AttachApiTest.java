@@ -206,12 +206,14 @@ abstract class AttachApiTest {
 	 * @return Output from command
 	 */
 	protected List<String> runCommand(List<String> args) throws IOException {
+System.out.println("AAA: runCommand constructor");
 		ArrayList<String> cmdLine = new ArrayList<>();
 		cmdLine.add(commandName);
 		cmdLine.addAll(args);
 		log(cmdLine.stream().collect(Collectors.joining(" ", "command line: ", "")));
 		ProcessBuilder jpsProcess = new ProcessBuilder(cmdLine);
 		Process proc = jpsProcess.start();
+System.out.println("AAA:runCommand proc started");
 		List<String> outputLines = Collections.emptyList();
 		try (BufferedReader jpsOutReader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
 			outputLines = jpsOutReader.lines().collect(Collectors.toList());
@@ -219,6 +221,7 @@ abstract class AttachApiTest {
 		} catch (InterruptedException e) {
 			/* ignore */
 		}
+System.out.println("AAA: runCommand completed");
 		return outputLines;
 	}
 

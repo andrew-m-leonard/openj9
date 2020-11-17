@@ -51,13 +51,21 @@ public class TestJps extends AttachApiTest {
 	
 	@Test(groups = { "level.extended" })
 	public void testJpsSanity() throws IOException {
+System.out.println("AAA: testJpsSanity start");
 		TargetManager tgtMgr = new TargetManager(TARGET_VM_CLASS, null);
+System.out.println("AAA: testJpsSanity start 1");
 		assertTrue(CHILD_PROCESS_DID_NOT_LAUNCH, tgtMgr.syncWithTarget());
+System.out.println("AAA: testJpsSanity start 2");
 		List<String> jpsOutput = runCommand();
+System.out.println("AAA: testJpsSanity start 3");
 		assertTrue(TEST_PROCESS_ID_MISSING, StringUtilities.searchSubstring(vmId, jpsOutput).isPresent());
+System.out.println("AAA: testJpsSanity start 4");
 		assertTrue("jps is missing", StringUtilities.searchSubstring(JPS_Class, jpsOutput).isPresent()); //$NON-NLS-1$
+System.out.println("AAA: testJpsSanity start 5");
 		assertTrue(CHILD_IS_MISSING, StringUtilities.searchSubstring(tgtMgr.targetId, jpsOutput).isPresent());
+System.out.println("AAA: testJpsSanity start 6");
 		tgtMgr.terminateTarget();
+System.out.println("AAA: testJpsSanity start 7");
 	}
 
 	@Test(groups = { "level.extended" })
